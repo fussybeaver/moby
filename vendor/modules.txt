@@ -266,6 +266,7 @@ github.com/containerd/containerd/contrib/nvidia
 github.com/containerd/containerd/contrib/seccomp/kernelversion
 github.com/containerd/containerd/defaults
 github.com/containerd/containerd/diff
+github.com/containerd/containerd/diff/apply
 github.com/containerd/containerd/diff/walking
 github.com/containerd/containerd/errdefs
 github.com/containerd/containerd/events
