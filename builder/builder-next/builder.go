@@ -364,7 +364,7 @@ func (b *Builder) Build(ctx context.Context, opt backend.BuildConfig) (*builder.
 		}
 	}
 
-	if (exporterName == client.ExporterImage || exporterName == exporter.Moby) && len(opt.Options.Tags) > 0 {
+	if (exporterName == client.ExporterImage || exporterName == client.ExporterOCI || exporterName == exporter.Moby) && len(opt.Options.Tags) > 0 {
 		nameAttr, err := overrides.SanitizeRepoAndTags(opt.Options.Tags)
 		if err != nil {
 			return nil, err
@@ -407,7 +407,7 @@ func (b *Builder) Build(ctx context.Context, opt backend.BuildConfig) (*builder.
 		if err != nil {
 			return err
 		}
-		if exporterName != exporter.Moby && exporterName != client.ExporterImage {
+		if exporterName != exporter.Moby && exporterName != client.ExporterImage && exporterName != client.ExporterOCI {
 			return nil
 		}
 		id, ok := resp.ExporterResponse["containerimage.digest"]

@@ -8,6 +8,8 @@ import (
 	"time"
 
 	ctd "github.com/containerd/containerd"
+	"github.com/containerd/containerd/diff/apply"
+	"github.com/containerd/containerd/diff/walking"
 	"github.com/containerd/containerd/content/local"
 	ctdmetadata "github.com/containerd/containerd/metadata"
 	"github.com/containerd/containerd/snapshots"
@@ -240,6 +242,8 @@ func newGraphDriverController(ctx context.Context, rt http.RoundTripper, opt Opt
 		MetadataStore:   md,
 		PruneRefChecker: refChecker,
 		LeaseManager:    lm,
+		Applier:         apply.NewFileSystemApplier(store),
+		Differ:          walking.NewWalkingDiff(store),
 		ContentStore:    store,
 		GarbageCollect:  mdb.GarbageCollect,
 	})

@@ -13,6 +13,8 @@ import (
 	"github.com/containerd/containerd/log"
 	"github.com/containerd/containerd/platforms"
 	"github.com/containerd/containerd/rootfs"
+	"github.com/containerd/containerd/diff/apply"
+	"github.com/containerd/containerd/diff/walking"
 	"github.com/docker/docker/builder/builder-next/adapters/containerimage"
 	mobyexporter "github.com/docker/docker/builder/builder-next/exporter"
 	distmetadata "github.com/docker/docker/distribution/metadata"
@@ -27,7 +29,9 @@ import (
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/executor"
 	"github.com/moby/buildkit/exporter"
+	imageexporter "github.com/moby/buildkit/exporter/containerimage"
 	localexporter "github.com/moby/buildkit/exporter/local"
+	ociexporter "github.com/moby/buildkit/exporter/oci"
 	tarexporter "github.com/moby/buildkit/exporter/tar"
 	"github.com/moby/buildkit/frontend"
 	"github.com/moby/buildkit/session"
@@ -261,6 +265,22 @@ func (w *Worker) Exporter(name string, sm *session.Manager) (exporter.Exporter, 
 	case client.ExporterTar:
 		return tarexporter.New(tarexporter.Opt{
 			SessionManager: sm,
+		})
+	case client.ExporterOCI:
+		iw, err := imageexporter.NewImageWriter(imageexporter.WriterOpt{
+			Snapshotter:  w.Opt.Snapshotter,
+			ContentStore: w.Opt.ContentStore,
+			Applier:      apply.NewFileSystemApplier(w.Opt.ContentStore),
+			Differ:       walking.NewWalkingDiff(w.Opt.ContentStore),
+		})
+		if err != nil {
+			return nil, err
+		}
+		return ociexporter.New(ociexporter.Opt{
+			SessionManager: sm,
+			ImageWriter: iw,
+			Variant: "oci",
+			LeaseManager: w.Opt.LeaseManager,
 		})
 	default:
 		return nil, errors.Errorf("exporter %q could not be found", name)
